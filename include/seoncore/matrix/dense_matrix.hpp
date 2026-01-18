@@ -22,6 +22,11 @@ template <
 class DenseMatrix : public BaseMatrix<DenseMatrix<TN, _Major>, TN>
 {
 public:
+    /**
+     * @brief Owning dense matrix with fixed major order.
+     *
+     * Storage is contiguous, with strides derived from the major order.
+     */
     friend BaseMatrix<DenseMatrix<TN, _Major>, TN>;
 
     using self                  = DenseMatrix<TN, _Major>;
@@ -40,6 +45,9 @@ public:
     using trans_view            = seoncore::views::TransposedView<TN>;
     using const_trans_view      = seoncore::views::ConstTransposedView<TN>;
 
+    /**
+     * @brief Construct an empty matrix.
+     */
     DenseMatrix()
         : _rows(0)
         , _cols(0)
@@ -47,6 +55,12 @@ public:
         , _sc(0)
     {};
 
+    /**
+     * @brief Construct a matrix from flat data.
+     * @param data Flat storage in logical order.
+     * @param rows Logical number of rows.
+     * @param cols Logical number of columns.
+     */
     DenseMatrix(
             const std::vector<TN>& data,
             size_type rows,
@@ -84,23 +98,88 @@ private:
     size_type stride_row_impl() const noexcept { return _sr; };
     size_type stride_col_impl() const noexcept { return _sc; };
 
+    /**
+     * @brief Mutable element access by logical index.
+     * @param i Row index.
+     * @param j Column index.
+     * @return Reference to element (i, j).
+     */
     reference at_impl(size_type i, size_type j) noexcept       { return _data[i * _sr + j * _sc]; };
+    /**
+     * @brief Const element access by logical index.
+     * @param i Row index.
+     * @param j Column index.
+     * @return Const reference to element (i, j).
+     */
     const_ref at_impl(size_type i, size_type j) const noexcept { return _data[i * _sr + j * _sc]; };
 
     
+    /**
+     * @brief Get mutable row view.
+     * @param i Row index.
+     * @return Row view of row i.
+     */
     row_view       get_row_impl(size_type i);
+    /**
+     * @brief Get const row view.
+     * @param i Row index.
+     * @return Const row view of row i.
+     */
     const_row_view get_row_impl(size_type i) const;
+    /**
+     * @brief Get mutable column view.
+     * @param j Column index.
+     * @return Column view of column j.
+     */
     col_view       get_col_impl(size_type j);
+    /**
+     * @brief Get const column view.
+     * @param j Column index.
+     * @return Const column view of column j.
+     */
     const_col_view get_col_impl(size_type j) const;
 
+    /**
+     * @brief Fill all elements with a value.
+     * @param value Value to assign.
+     */
     void fill_impl(const TN& value);
+    /**
+     * @brief Get a mutable transposed view.
+     * @return Transposed view.
+     */
     trans_view transpose_view_impl();
+    /**
+     * @brief Get a const transposed view.
+     * @return Const transposed view.
+     */
     const_trans_view transpose_view_impl() const;
 
+    /**
+     * @brief Sum of all elements.
+     * @return Sum value.
+     */
     type        sum_impl()               const;
+    /**
+     * @brief p-norm of the matrix (implementation-defined).
+     * @param p Norm order.
+     * @return p-norm value.
+     */
     type        norm_p_impl(size_type p) const;
+    /**
+     * @brief Element-wise absolute value.
+     * @return New matrix with absolute values.
+     */
     DenseMatrix abs_impl()               const;
+    /**
+     * @brief Maximum element value.
+     * @return Maximum element.
+     */
     type        max_impl()               const;
+    /**
+     * @brief Get a matrix-like view wrapper.
+     * @return MatrixLike wrapper.
+     */
     matrix_like get_view_impl()          const;
 
 }; // class DenseMatrix<TN, _Major>

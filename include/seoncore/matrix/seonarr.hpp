@@ -16,6 +16,11 @@ template <
 class seonarr
 {
 public:
+    /**
+     * @brief Matrix container with selectable policy and major order.
+     *
+     * This is an owning wrapper over dense matrix variants.
+     */
 
 private:
     std::variant<

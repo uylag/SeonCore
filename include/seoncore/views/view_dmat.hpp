@@ -11,11 +11,22 @@ template <typename TN>
 class DenseMatrixView
 {
 public:
+    /**
+     * @brief Mutable dense matrix view with explicit strides.
+     */
     using size_type = std::size_t;
     using Major     = seoncore::enums::Major;
     using iterator  = seoncore::iterators::iter_dense<TN>;
 
     DenseMatrixView() = default;
+    /**
+     * @brief Construct a dense matrix view.
+     * @param data Base pointer to matrix storage.
+     * @param rows Logical number of rows.
+     * @param cols Logical number of columns.
+     * @param sr Row stride.
+     * @param sc Column stride.
+     */
     DenseMatrixView(
             TN* data,
             size_type rows,
@@ -29,11 +40,21 @@ public:
         , _sc(sc)
     {};
 
+    /**
+     * @brief Iterator to the first element using a given traversal order.
+     * @param major Traversal order (row-major or column-major).
+     * @return Dense iterator at the first logical element.
+     */
     iterator begin(Major major) const
     {
         return iterator(_data, _rows, _cols, _sr, _sc, major, 0);
     };
 
+    /**
+     * @brief Iterator past the last element using a given traversal order.
+     * @param major Traversal order (row-major or column-major).
+     * @return Dense iterator at the logical end.
+     */
     iterator end(Major major) const
     {
         return iterator(_data, _rows, _cols, _sr, _sc, major, _rows * _cols);
@@ -51,11 +72,22 @@ template <typename TN>
 class ConstDenseMatrixView
 {
 public:
+    /**
+     * @brief Read-only dense matrix view with explicit strides.
+     */
     using size_type = std::size_t;
     using Major     = seoncore::enums::Major;
     using iterator  = seoncore::iterators::iter_dense<const TN>;
 
     ConstDenseMatrixView() = default;
+    /**
+     * @brief Construct a const dense matrix view.
+     * @param data Base pointer to matrix storage.
+     * @param rows Logical number of rows.
+     * @param cols Logical number of columns.
+     * @param sr Row stride.
+     * @param sc Column stride.
+     */
     ConstDenseMatrixView(
             const TN* data,
             size_type rows,
@@ -69,11 +101,21 @@ public:
         , _sc(sc)
     {};
 
+    /**
+     * @brief Iterator to the first element using a given traversal order.
+     * @param major Traversal order (row-major or column-major).
+     * @return Dense iterator at the first logical element.
+     */
     iterator begin(Major major) const
     {
         return iterator(_data, _rows, _cols, _sr, _sc, major, 0);
     };
 
+    /**
+     * @brief Iterator past the last element using a given traversal order.
+     * @param major Traversal order (row-major or column-major).
+     * @return Dense iterator at the logical end.
+     */
     iterator end(Major major) const
     {
         return iterator(_data, _rows, _cols, _sr, _sc, major, _rows * _cols);
