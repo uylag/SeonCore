@@ -6,12 +6,12 @@ namespace seoncore::views
 {
 
 template <typename TN>
-class SparseCSRMatrixView
+class SparseCRSMatrixView
 {
 public:
     using size_type = unsigned long long;
 
-    SparseCSRMatrixView() = default;
+    SparseCRSMatrixView() = default;
 private:
     
 };

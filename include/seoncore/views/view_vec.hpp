@@ -6,11 +6,11 @@ namespace seoncore::views
 {
 
 template <typename TN>
-class DenseVectorView
+class VectorView
 {
 public:
 
-    DenseVectorView() = default;
+    VectorView() = default;
 private:
 };
 
