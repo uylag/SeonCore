@@ -10,6 +10,8 @@
 #include <seoncore/views/matrix_like.hpp>
 #include <seoncore/views/vector_like.hpp>
 #include <seoncore/ops/blas.hpp>
+#include <seoncore/ops/reduce.hpp>
+#include <seoncore/ops/transform.hpp>
 
 namespace seoncore::matrix
 {
@@ -110,24 +112,6 @@ struct BaseMatrix
     const TN* data() const
     {
         return derived().data_impl();
-    };
-
-    /**
-     * @brief Row stride.
-     * @return Offset between consecutive rows.
-     */
-    size_type stride_row() const
-    {
-        return derived().stride_row_impl();
-    };
-
-    /**
-     * @brief Column stride.
-     * @return Offset between consecutive columns.
-     */
-    size_type stride_col() const
-    {
-        return derived().stride_col_impl();
     };
 
     /**
@@ -251,7 +235,9 @@ struct BaseMatrix
      */
     type sum() const
     {
-        return derived().sum_impl();
+        return seoncore
+               ::ops
+               ::sum<TN>(get_view());
     };
 
     /**
@@ -261,7 +247,9 @@ struct BaseMatrix
      */
     type norm_p(size_type p) const
     {
-        return derived().norm_p_impl(p);
+        return seoncore
+               ::ops
+               ::norm_p<TN>(get_view(), p);
     };
 
     [[nodiscard]]
@@ -271,7 +259,9 @@ struct BaseMatrix
      */
     D abs() const
     {
-        return derived().abs_impl();
+        return seoncore
+               ::ops
+               ::abs<TN>(get_view());
     };
 
     /**
@@ -280,9 +270,17 @@ struct BaseMatrix
      */
     type max() const 
     {
-        return derived().max_impl();
+        return seoncore
+               ::ops
+               ::max<TN>(get_view());
     };
 
+    type min() const
+    {
+        return seoncore
+               ::ops
+               ::min<TN>(get_view());
+    };
     /**
      * @brief Maximum absolute element value.
      * @return Maximum absolute element.
@@ -311,7 +309,7 @@ struct BaseMatrix
     {
         return seoncore
                ::ops
-               ::dot(get_view(), other);
+               ::dot<TN>(get_view(), other);
     };
 
     /**
@@ -323,7 +321,15 @@ struct BaseMatrix
     {
         return seoncore
                ::ops
-               ::dot(get_view(), other);
+               ::dot<TN>(get_view(), other);
+    };
+
+    template <typename _RightVal>
+    type dot(const _RightVal& other) const
+    {
+        return seoncore
+               ::ops
+               ::dot<TN>(get_view(), other.get_view());
     };
 
     /**
@@ -335,20 +341,20 @@ struct BaseMatrix
      * @return Result vector in a seonarr container.
      */
     auto gemv(
-        const vector_like& x,
-        type alpha = 1,
-        const vector_like& y =
+            const vector_like& x,
+            type alpha = 1,
+            const vector_like& y =
             seoncore::views::like::VectorLikeDefault<TN>(),
-        type beta = 0
-    ) const -> seoncore::matrix::seonarr<
-                    TN,
-                    seoncore::enums::Major::Row,
-                    seoncore::policy::auto_select
-                >
+            type beta = 0
+            ) const -> seoncore::matrix::seonarr<
+        TN,
+        seoncore::enums::Major::Row,
+        seoncore::policy::auto_select
+            >
     {
         return seoncore
                ::ops
-               ::gemv(get_view(), x, alpha, y, beta);
+               ::gemv<TN>(get_view(), x, alpha, y, beta);
     };
 
     /**
@@ -373,7 +379,7 @@ struct BaseMatrix
     {
         return seoncore
                ::ops
-               ::gemm(get_view(), B, alpha, C, beta);
+               ::gemm<TN>(get_view(), B, alpha, C, beta);
     };
 
 };

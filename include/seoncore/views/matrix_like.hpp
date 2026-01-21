@@ -1,8 +1,10 @@
 #pragma once
 
 #include <cstddef>
+#include <stdexcept>
 #include <type_traits>
 #include <variant>
+#include <iostream>
 #include <seoncore/enums/major.hpp>
 #include <seoncore/enums/sparse_type.hpp>
 #include <seoncore/iterators/iter_dense.hpp>
@@ -44,16 +46,16 @@ public:
     using iterator_col = seoncore::iterators::iter_col<TN, false>;
     using const_iter_col = seoncore::iterators::iter_col<TN, true>;
 
+    /**
+    * @brief Dense storage descriptor.
+    * @param _data Base pointer to matrix storage.
+    * @param _rows Logical number of rows.
+    * @param _cols Logical number of columns.
+    * @param _stride_row Row stride.
+    * @param _stride_col Column stride.
+    */
     struct _DenseLike
     {
-        /**
-         * @brief Dense storage descriptor.
-         * @param _data Base pointer to matrix storage.
-         * @param _rows Logical number of rows.
-         * @param _cols Logical number of columns.
-         * @param _stride_row Row stride.
-         * @param _stride_col Column stride.
-         */
         const_ptr _data;
         size_type _rows;
         size_type _cols;
@@ -61,16 +63,16 @@ public:
         size_type _stride_col;
     };
 
+    /**
+    * @brief Sparse CRS/CSR storage descriptor.
+    * @param `_values` Nonzero values array.
+    * @param `_col_idx` Column indices per nonzero.
+    * @param `_row_ptr` Row pointer offsets.
+    * @param `_rows` Logical number of rows.
+    * @param `_cols` Logical number of columns.
+    */
     struct _CRSLike
     {
-        /**
-         * @brief Sparse CRS/CSR storage descriptor.
-         * @param _values Nonzero values array.
-         * @param _col_idx Column indices per nonzero.
-         * @param _row_ptr Row pointer offsets.
-         * @param _rows Logical number of rows.
-         * @param _cols Logical number of columns.
-         */
         const_ptr _values;
         const size_type* _col_idx;
         const size_type* _row_ptr;
@@ -101,7 +103,7 @@ public:
             _CRSLike,
             _CSCLike
         >;
-
+ 
     MatrixLike() noexcept = default;
 
     /**
@@ -165,11 +167,11 @@ public:
     size_type rows() const noexcept
     {
         if (auto p = std::get_if<_DenseLike>(&_storage))
-            return p->rows;
+            return p->_rows;
         if (auto p = std::get_if<_CRSLike>(&_storage))
-            return p->rows;
+            return p->_rows;
         if (auto p = std::get_if<_CSCLike>(&_storage))
-            return p->rows;
+            return p->_rows;
 
         return 0;
     };
@@ -181,11 +183,11 @@ public:
     size_type cols() const noexcept
     {
         if (auto p = std::get_if<_DenseLike>(&_storage))
-            return p->cols;
+            return p->_cols;
         if (auto p = std::get_if<_CRSLike>(&_storage))
-            return p->cols;
+            return p->_cols;
         if (auto p = std::get_if<_CSCLike>(&_storage))
-            return p->cols;
+            return p->_cols;
 
         return 0;
     };
@@ -242,6 +244,16 @@ public:
 
         return iterator(nullptr, 0, 0, 0, 0, major, 0);
     };
+    
+    const TN& at(index_type i, index_type j) const noexcept
+    {
+        if (auto p = std::get_if<_DenseLike>(&_storage))
+            return p->_data[i * p->_stride_row + j * p->_stride_col];
+        
+        std::cerr << "FATAL: MatrixLike::operator()(i,j) called on unknown view\n";
+        std::cerr << "       i = " << i << ", j = " << j << '\n';
+        std::terminate();
+    };
 
     /**
      * @brief Access a logical element by index.
@@ -251,9 +263,7 @@ public:
      */
     const TN& operator()(index_type i, index_type j) const noexcept
     {
-        if (auto p = std::get_if<_DenseLike>(&_storage))
-            return p->_data[i * p->_stride_row + j * p->_stride_col];
-        return TN{-1.23456789};
+        return at(i, j);
     };
 
 private:

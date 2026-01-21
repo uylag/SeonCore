@@ -9,23 +9,17 @@
 
 using namespace seoncore::views;
 using namespace seoncore::enums;
+using namespace seoncore::matrix;
 
-/**
- * @brief Demo entry point for basic matrix iteration.
- * @return Exit code.
- */
 int main()
 {
-    std::vector<double> matrix = {
-        1, 2, 3,
-        4, 5, 6
-    };
+    DenseMatrix<long double> d1({
+        {1, 2, 3},
+        {4, 5, 6}
+    });
 
-    std::size_t sr = 3;
-    std::size_t sc = 1;
-    
-    seoncore::views::MatrixLike<double> mat_ml{ matrix.data(), 2, 3, sr, sc };
-
-    for (auto it = mat_ml.begin(); it != mat_ml.end(); ++it)
-        std::cout << *it << " ";
+    std::cout << "Norm_p: " << d1.norm_p(2) << '\n';
+    std::cout << "Sum: " << d1.sum() << '\n';
+    std::cout << "Max: " << d1.max() << '\n';
+    std::cout << "Min: " << d1.min() << '\n';
 };
