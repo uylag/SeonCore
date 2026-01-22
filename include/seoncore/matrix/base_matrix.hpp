@@ -1,5 +1,6 @@
 #pragma once
 
+#include "seoncore/enums/policy.hpp"
 #include <cstddef>
 #include <utility>
 #include <seoncore/iterators/iter_dense.hpp>
@@ -7,21 +8,15 @@
 #include <seoncore/views/transposed_view.hpp>
 #include <seoncore/views/row_view.hpp>
 #include <seoncore/views/col_view.hpp>
-#include <seoncore/views/matrix_like.hpp>
 #include <seoncore/views/vector_like.hpp>
+#include <seoncore/views/matrix_like.hpp>
+#include <seoncore/matrix/seonarr_fwd.hpp>
 #include <seoncore/ops/blas.hpp>
 #include <seoncore/ops/reduce.hpp>
 #include <seoncore/ops/transform.hpp>
 
 namespace seoncore::matrix
 {
-
-template <
-    typename TN,
-    seoncore::enums::Major _Major,
-    class _Policy
->
-class seonarr;
 
 template <class Derived, class TN>
 struct BaseMatrix
@@ -114,6 +109,11 @@ struct BaseMatrix
         return derived().data_impl();
     };
 
+    seoncore::enums::Major major() const
+    {
+        return derived().major_impl();
+    };
+
     /**
      * @brief Matrix shape.
      * @return Pair of (rows, cols).
@@ -194,15 +194,6 @@ struct BaseMatrix
         return derived().get_col_impl(j);
     };
 
-    /**
-     * @brief Fill all elements with a value.
-     * @param value Value to assign to every element.
-     */
-    void fill(const TN& value)
-    {
-        derived().fill_impl(value);
-    };
-
     //D transpose() const
     //{
     //   return derived().transpose_impl();
@@ -257,7 +248,11 @@ struct BaseMatrix
      * @brief Element-wise absolute value.
      * @return New matrix with absolute values.
      */
-    D abs() const
+    auto abs() const ->
+        seoncore::matrix::seonarr<
+            TN,
+            seoncore::policy::fixed_dense
+        >
     {
         return seoncore
                ::ops
@@ -348,8 +343,7 @@ struct BaseMatrix
             type beta = 0
             ) const -> seoncore::matrix::seonarr<
         TN,
-        seoncore::enums::Major::Row,
-        seoncore::policy::auto_select
+        seoncore::policy::fixed_dense
             >
     {
         return seoncore
@@ -373,8 +367,7 @@ struct BaseMatrix
             type beta = 0
         ) const -> seoncore::matrix::seonarr<
                         TN,
-                        seoncore::enums::Major::Row,
-                        seoncore::policy::auto_select
+                        seoncore::policy::fixed_dense
                     >
     {
         return seoncore

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <seoncore/enums/policy.hpp>
 #include <cstddef>
 #include <stdexcept>
 #include <type_traits>
@@ -14,17 +15,23 @@
 #include <seoncore/views/view_dmat.hpp>
 #include <seoncore/views/view_smat.hpp>
 #include <seoncore/views/view_vec.hpp>
+#include <seoncore/views/matrix_like_fwd.hpp>
+#include <seoncore/matrix/dense_matrix_fwd.hpp>
+#include <seoncore/matrix/seonarr_fwd.hpp>
 
 namespace seoncore::views
 {
 
 template <
-    typename TN, 
-    class /* sparse type */ _SpTy = seoncore::sparse::SparseType::CRS
+    typename TN,
+    class /* sparse type */ _SpTy
 >
 class MatrixLike
 {
 public:
+
+    friend seoncore::matrix::DenseMatrix<TN>;
+
     /**
      * @brief Lightweight matrix view wrapper for dense or sparse storage.
      *
@@ -35,7 +42,6 @@ public:
     using difference_type = std::ptrdiff_t;
     using index_type = std::size_t;
     using const_ptr = const TN*;
-    using Major = seoncore::enums::Major;
 
     using vec_view = seoncore::views::VectorView<TN>;
 
@@ -56,11 +62,12 @@ public:
     */
     struct _DenseLike
     {
-        const_ptr _data;
-        size_type _rows;
-        size_type _cols;
-        size_type _stride_row;
-        size_type _stride_col;
+        const_ptr                  _data;
+        size_type                  _rows;
+        size_type                  _cols;
+        size_type                  _stride_row;
+        size_type                  _stride_col;
+        seoncore::enums::Major     _major;
     };
 
     /**
@@ -103,7 +110,14 @@ public:
             _CRSLike,
             _CSCLike
         >;
- 
+    using const_storage_type = const std::variant<
+            std::monostate,
+            _DenseLike,
+            _CRSLike,
+            _CSCLike
+        >;
+
+
     MatrixLike() noexcept = default;
 
     /**
@@ -115,13 +129,46 @@ public:
      * @param stride_col Column stride.
      */
     MatrixLike(
-        const_ptr data,
-        size_type rows,
-        size_type cols,
-        size_type stride_row,
-        size_type stride_col) noexcept
-        : _storage(_DenseLike{ data, rows, cols, stride_row, stride_col })
+        const_ptr                  data,
+        size_type                  rows,
+        size_type                  cols,
+        size_type                  stride_row,
+        size_type                  stride_col,
+        seoncore::enums::Major     major) noexcept
+        : _storage(_DenseLike{ data, rows, cols, stride_row, stride_col, major })
     {};
+
+    MatrixLike(
+            const seoncore::matrix::DenseMatrix<TN>& dense)
+        : _storage(_DenseLike{
+            dense.data(),
+            dense.rows(),
+            dense.cols(),
+            dense.stride_row(),
+            dense.stride_col(),
+            dense.major()})
+    {};
+
+    template <class _Policy = seoncore::policy::fixed_dense>
+    MatrixLike(const seoncore::matrix::seonarr<TN, _Policy>& sarr)
+    {
+        if constexpr (std::is_same_v<_Policy, seoncore::policy::fixed_dense>)
+        {
+            _storage = _DenseLike {
+                sarr.data(),
+                sarr.rows(),
+                sarr.cols(),
+                sarr.stride_row(),
+                sarr.stride_col(),
+                sarr.major()
+            };
+        } 
+        else if constexpr (std::is_same_v<_Policy, seoncore::policy::fixed_sparse>)
+        {
+
+        }
+        else throw std::logic_error("MatrixLike(seonarr): given wrong policy.");
+    };
 
     /**
      * @brief Construct a sparse matrix view.
@@ -206,7 +253,7 @@ public:
      * @param major Traversal order for dense iteration.
      * @return Dense iterator at the logical start.
      */
-    iterator begin(Major major = Major::Row) const noexcept
+    iterator begin() const noexcept
     {
         if (auto p = std::get_if<_DenseLike>(&_storage))
         {
@@ -216,11 +263,11 @@ public:
                 p->_cols,
                 p->_stride_row,
                 p->_stride_col,
-                major,
+                p->_major,
                 0);
-        }
+        };
 
-        return iterator(nullptr, 0, 0, 0, 0, major, 0);
+        return iterator(nullptr, 0, 0, 0, 0, seoncore::enums::Major::Row, 0);
     };
 
     /**
@@ -228,7 +275,7 @@ public:
      * @param major Traversal order for dense iteration.
      * @return Dense iterator at the logical end.
      */
-    iterator end(Major major = Major::Row) const noexcept
+    iterator end() const noexcept
     {
         if (auto p = std::get_if<_DenseLike>(&_storage))
         {
@@ -238,11 +285,11 @@ public:
                 p->_cols,
                 p->_stride_row,
                 p->_stride_col,
-                major,
+                p->_major,
                 p->_rows * p->_cols);
-        }
+        };
 
-        return iterator(nullptr, 0, 0, 0, 0, major, 0);
+        return iterator(nullptr, 0, 0, 0, 0, seoncore::enums::Major::Row, 0);
     };
     
     const TN& at(index_type i, index_type j) const noexcept
@@ -266,6 +313,9 @@ public:
         return at(i, j);
     };
 
+    storage_type& storage() { return _storage; };
+    const_storage_type& storage() const { return _storage; };
+
 private:
     storage_type _storage;
 }; // MatrixLike<TN, _SpTy>
@@ -279,7 +329,7 @@ struct MatrixLikeDefault : MatrixLike<TN>
     /**
      * @brief Default MatrixLike instance for optional parameters.
      */
-};
+}; // struct MatrixLikeDefault<TN>
 
 }; // namespace seoncore::views::like
 

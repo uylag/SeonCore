@@ -8,12 +8,11 @@ namespace seoncore::matrix
 
 // TODO: implement to_matrix 
 template <
-    typename TN, 
-    seoncore::enums::Major _Major = seoncore::enums::Major::Row
+    typename TN
 >
 class Vector
 {
 
-}; // class Vector<TN, _Major>
+}; // class Vector<TN>
 
 };

@@ -4,21 +4,10 @@
 #include <seoncore/concepts/like_concept.hpp>
 #include <seoncore/views/matrix_like.hpp>
 #include <seoncore/views/vector_like.hpp>
+#include <seoncore/matrix/seonarr_fwd.hpp>
 #include <seoncore/enums/policy.hpp>
 #include <seoncore/enums/major.hpp>
 #include <stdexcept>
-
-namespace seoncore::matrix
-{
-
-template <
-    typename TN, 
-    seoncore::enums::Major,
-    class _Policy
->
-class seonarr;
-
-};
 
 namespace seoncore::ops
 {
@@ -114,8 +103,7 @@ auto gemv(
         TN beta = 0
     ) -> seoncore::matrix::seonarr<
                 TN,
-                seoncore::enums::Major::Row,
-                seoncore::policy::auto_select
+                seoncore::policy::fixed_dense
             >
 {
 };
@@ -130,8 +118,7 @@ auto gemm(
         TN beta = 0
     ) -> seoncore::matrix::seonarr<
                 TN,
-                seoncore::enums::Major::Row,
-                seoncore::policy::auto_select
+                seoncore::policy::fixed_dense
             >
 {
     /**
@@ -146,7 +133,6 @@ auto gemm(
     //(A, B, alpha, C, beta);
     return seoncore::matrix::seonarr<
         TN, 
-        seoncore::enums::Major::Row,
         seoncore::policy::fixed_dense
     >();
 };

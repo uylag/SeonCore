@@ -3,6 +3,7 @@
 #include <seoncore/views/row_view.hpp>
 #include <seoncore/views/col_view.hpp>
 #include <seoncore/matrix/dense_matrix.hpp>
+#include <seoncore/matrix/seonarr.hpp>
 #include <seoncore/views/matrix_like.hpp>
 #include <vector>
 #include <iostream>
@@ -14,12 +15,12 @@ using namespace seoncore::matrix;
 int main()
 {
     DenseMatrix<long double> d1({
-        {1, 2, 3},
-        {4, 5, 6}
+        {-1, 2, -3},
+        {4, -5, 6}
     });
 
-    std::cout << "Norm_p: " << d1.norm_p(2) << '\n';
-    std::cout << "Sum: " << d1.sum() << '\n';
-    std::cout << "Max: " << d1.max() << '\n';
-    std::cout << "Min: " << d1.min() << '\n';
+    seonarr<long double> arr(d1);
+   
+    std::cout << arr.abs(); 
+
 };

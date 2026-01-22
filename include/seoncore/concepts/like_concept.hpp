@@ -31,7 +31,7 @@ concept VectorBased = requires(const _ToCheck& x)
 }; // concept VectorBased<_ToCheck>
 
 template <class _ToCheck>
-concept IsMatrix = requires(const std::remove_cvref_t<_ToCheck>& x)
+concept IsDense = requires(const std::remove_cvref_t<_ToCheck>& x)
 {
     typename std::remove_cvref_t<_ToCheck>::value_type;
 
@@ -40,11 +40,21 @@ concept IsMatrix = requires(const std::remove_cvref_t<_ToCheck>& x)
     
     { x(0, 0) } -> std::convertible_to<typename std::remove_cvref_t<_ToCheck>::value_type>;
 
-    requires ConvertibleToAny<
-        decltype(x.norm_p(std::size_t{2})),
-        typename std::remove_cvref_t<_ToCheck>::value_type,
-        double, long double, int, long long
-    >;
-};
+    { x.stride_row() } -> std::convertible_to<std::size_t>;
+    { x.stride_col() } -> std::convertible_to<std::size_t>; 
+}; // concept IsDense<_ToCheck>
+
+template <class _ToCheck>
+concept IsSparse = requires(const std::remove_cvref_t<_ToCheck>& x)
+{
+    typename std::remove_cvref_t<_ToCheck>::value_type;
+
+    { x.rows() } -> std::convertible_to<std::size_t>;
+    { x.cols() } -> std::convertible_to<std::size_t>;
+    
+    { x(0, 0) } -> std::convertible_to<typename std::remove_cvref_t<_ToCheck>::value_type>;
+
+    { x.nnz() } -> std::convertible_to<std::size_t>;
+}; // concept IsDense<_ToCheck>
 
 }; // namespace seoncore::concepts

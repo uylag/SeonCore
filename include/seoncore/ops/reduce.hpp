@@ -6,21 +6,12 @@
 #include <seoncore/concepts/like_concept.hpp>
 #include <seoncore/views/matrix_like.hpp>
 #include <seoncore/views/vector_like.hpp>
+#include <seoncore/matrix/seonarr_fwd.hpp>
 #include <seoncore/enums/policy.hpp>
 #include <seoncore/enums/major.hpp>
 #include <numeric>
 #include <stdexcept>
 #include <type_traits>
-
-namespace seoncore::matrix
-{
-template <
-    typename TN,
-    seoncore::enums::Major _Major,
-    class _Policy
->
-class seonarr;
-};
 
 namespace seoncore::ops
 {
@@ -61,11 +52,11 @@ auto norm_p(const _Val& a, std::size_t p) -> TN
 requires (
         seoncore::concepts::MatrixBased<_Val> ||
         seoncore::concepts::VectorBased<_Val> ||
-        seoncore::concepts::IsMatrix<_Val>)
+        seoncore::concepts::IsDense<_Val>)
 {
     TN result = TN{0};
 
-    if constexpr (seoncore::concepts::IsMatrix<_Val>)
+    if constexpr (seoncore::concepts::IsDense<_Val>)
     {
         seoncore::views::MatrixLike<TN> tmp = a.get_view();
         for (auto& elem : tmp)
