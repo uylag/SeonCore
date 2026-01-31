@@ -1,0 +1,9 @@
+*.json
+br.sh
+build/
+bin/
+*.md
+**cache**
+.cache/
+*.cache*
+
