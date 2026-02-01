@@ -211,6 +211,11 @@ private:
         };
     };
 
+    constexpr void recompute_strides_impl() noexcept
+    {
+        _init_strides();
+    };
+
     constexpr void _null_st_params(DenseMatrix& a) noexcept
     {
         a._rows = 0;
@@ -270,3 +275,5 @@ private:
 }; // class DenseMatrix<TN>
 
 }; // namespace seoncore::matrix
+
+#include <seoncore/ops/dense_ops.hpp>

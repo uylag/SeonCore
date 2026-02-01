@@ -3,8 +3,6 @@
 #include <iostream>
 
 using namespace seoncore::matrix;
-using namespace seoncore::views;
-
 int main()
 {
     DenseMatrix<long double> test1({
@@ -15,16 +13,19 @@ int main()
 
     DenseMatrix<long double> test2({
         {4.06},
-        {3.05},
+        {-3.05},
         {4.07}
     });
 
     DenseMatrix<long double> result = test1 * test2;
 
-    for (std::size_t i = 0; i < result.rows(); ++i)
+    test2 = test2.abs();
+
+    for (std::size_t i = 0; i < test2.rows(); ++i)
     {
-        for (std::size_t j = 0; j < result.cols(); ++j)
-            std::cout << result(i, j) << " ";
+        for (std::size_t j = 0; j < test2.cols(); ++j)
+            std::cout << test2(i, j);
         std::cout << '\n';
     };
+    
 };

@@ -1,9 +1,11 @@
 #pragma once
 
 #include <seoncore/ops/matmul.hpp>
+#include <seoncore/ops/transform.hpp>
+#include <seoncore/views/vec.hpp>
 #include <seoncore/matrix/dense.hpp>
 
-namespace seoncore::ops
+namespace seoncore::matrix
 {
 
 template <typename TN>
@@ -28,4 +30,17 @@ constexpr auto tag_invoke(
     return C;
 };
 
-}; // namespace seoncore::ops
+template <typename TN>
+constexpr auto tag_invoke(
+    seoncore::tags::abs_t,
+    const seoncore::matrix::DenseMatrix<TN>& A)
+{
+    seoncore::matrix::DenseMatrix<TN> tmp(A);
+    seoncore::views::MutableVectorView<TN> tmpv = tmp.flatten();
+    for (auto& elem : tmpv)
+        if (elem < TN{0}) elem *= -1;
+
+    return tmp;
+};
+
+}; // namespace seoncore::matrix

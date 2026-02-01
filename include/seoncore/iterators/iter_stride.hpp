@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <type_traits>
+#include <utility>
 
 namespace seoncore::iterators
 {
@@ -18,9 +19,35 @@ public:
     using pointer   = std::conditional_t<IsConst, const TN*, TN*>;
     using reference = std::conditional_t<IsConst, const TN&, TN&>;
 
+    constexpr iter_stride()
+        : _data(nullptr), _stride(0), _pos(0)
+    {};
+
     constexpr iter_stride(pointer data, size_type stride, size_type pos) noexcept
         : _data(data), _stride(stride), _pos(pos)
     {};
+
+    constexpr iter_stride(const iter_stride& other) noexcept
+        : _data(other._data), _stride(other._stride), _pos(other._pos)
+    {};
+
+    constexpr iter_stride& operator=(const iter_stride& other) noexcept
+    {
+        if (this == other) return *this;
+
+        _data = other._data;
+        _stride = other._stride;
+        _pos = other._pos;
+        return *this;
+    };
+
+    constexpr iter_stride(iter_stride&& other) noexcept
+        : _data(std::move(other._data)), _stride(other._stride), _pos(other._pos)
+    {
+        other._data = nullptr;
+        other._stride = 0;
+        other._pos = 0;
+    };
 
     constexpr reference operator*() const noexcept
     {

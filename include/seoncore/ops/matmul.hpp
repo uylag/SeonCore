@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <seoncore/matrix/dense_fwd.hpp>
 #include <seoncore/concepts/matrix_like.hpp>
+#include <seoncore/ops/tag_invoke.hpp>
 #include <cassert>
 #include <cstddef>
 #include <utility>

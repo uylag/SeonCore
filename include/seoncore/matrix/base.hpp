@@ -6,6 +6,8 @@
 #include <seoncore/views/vec.hpp>
 #include <seoncore/views/transposed_fwd.hpp>
 #include <seoncore/concepts/matrix_like.hpp>
+#include <seoncore/ops/reduce.hpp>
+#include <seoncore/ops/transform.hpp>
 
 namespace seoncore::matrix
 {
@@ -39,8 +41,11 @@ public:
     constexpr enums::Major& major()             { return derived().major_impl(); };
     constexpr const enums::Major& major() const { return derived().major_impl(); };
 
-    // TODO: REWORK; NOT CORRECT
-    constexpr void set_major(const enums::Major& _maj) { derived().major() = _maj; };
+    constexpr void set_major(const enums::Major& _maj) 
+    { 
+        derived().major() = _maj; 
+        derived().recompute_strides_impl();
+    };
 
     constexpr size_type size() const { return rows() * cols(); };
 
@@ -60,6 +65,28 @@ public:
     transposed() noexcept { return derived().transposed_impl(); };
     constexpr auto 
     transposed() const noexcept { return derived().transposed_impl(); };
+
+    constexpr TN sum() const noexcept 
+    {
+        return seoncore::ops::sum(derived());
+    };
+
+    constexpr TN min() const noexcept
+    {
+        return seoncore::ops::min(derived());
+    };
+
+    constexpr TN max() const noexcept
+    {
+        return seoncore::ops::max(derived());
+    };
+
+    [[nodiscard]]
+    constexpr auto abs() const noexcept
+    {
+        return seoncore::ops::abs(derived());
+    };
+
 }; // class BaseMatrix<Derived, TN>
 
 }; // namespace seoncore::matrix
